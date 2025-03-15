@@ -27,7 +27,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const db = client.db('UserDB');
-    app.post('/getCoupon', async (req, res) => {
+    app.get('/getCoupon', async (req, res) => {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
       console.log(ip);
       res.send('this is a test response' + ip);
