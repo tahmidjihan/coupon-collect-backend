@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-
 require('dotenv').config();
 const app = express();
 
@@ -27,6 +26,12 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    const db = client.db('UserDB');
+    app.post('/getCoupon', async (req, res) => {
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      console.log(ip);
+      res.send('this is a test response' + ip);
+    });
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
     console.log(
