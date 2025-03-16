@@ -38,23 +38,23 @@ async function run() {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
       console.log(ip);
       const timestamp = Date.now();
-      if (ipCollection.find({ ip: ip }).toArray().length === 0) {
+      const existingIp = await ipCollection.findOne({ ip: ip });
+
+      if (!existingIp) {
         await ipCollection.insertOne({ ip: ip, timestamp: timestamp });
       } else {
+        const timeDifference = timestamp - existingIp.timestamp;
         // console.log(await ipCollection.findOne({ ip: ip }));
-        if (timestamp - ipCollection.findOne({ ip: ip }).timestamp > 3600000) {
+        if (timeDifference < 3600000) {
+          res.send('You have already collected a coupon');
+          console.log('ip is not updated');
+          return;
+        } else {
           await ipCollection.updateOne(
             { ip: ip },
             { $set: { timestamp: timestamp } }
           );
           console.log('ip updated');
-        } else if (
-          timestamp - ipCollection.findOne({ ip: ip }).timestamp <
-          3600000
-        ) {
-          console.log('ip not updated');
-          res.send({ error: 'You can only collect one coupon per hour' });
-          return;
         }
       }
       const coupons = await db.collection('Coupons').find().toArray();
